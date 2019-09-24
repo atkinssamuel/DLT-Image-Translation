@@ -23,28 +23,25 @@ def dlt_homography(I1pts, I2pts):
     """
     # --- FILL ME IN ---
     # Construct DLT Matrix A:
-    # First Iteration to Construct Base Ai:
-    A = np.array([-I1pts[0][0], -I1pts[0][1], -1, 0, 0, 0, I1pts[0][0] * I2pts[0][0],
-                  I1pts[0][1] * I2pts[0][0], I2pts[0][0]])
-    A = np.vstack([A, [0, 0, 0, -I1pts[0][0], -I1pts[0][1], -1, I1pts[0][0] * I2pts[0][1],
-                       I1pts[0][1] * I2pts[0][1], I2pts[0][1]]])
-    A = np.vstack([A, [-I1pts[0][2], -I1pts[0][3], -1, 0, 0, 0, I1pts[0][2] * I2pts[0][2],
-                       I1pts[0][3] * I2pts[0][2], I2pts[0][2]]])
-    A = np.vstack([A, [0, 0, 0, -I1pts[0][2], -I1pts[0][3], -1, I1pts[0][2] * I2pts[0][3],
-                       I1pts[0][3] * I2pts[0][3], I2pts[0][3]]])
 
     # Iterating through all of the provided points:
-    for i in range(1, len(I1pts)):
-        for j in range(0, len(I1pts[0]), 2):
-            A = np.vstack([A, [-I1pts[i][j], -I1pts[i][j + 1], -1, 0, 0, 0, I1pts[i][j] * I2pts[i][j],
-                               I1pts[i][j + 1] * I2pts[i][j], I2pts[i][j]]])
-            A = np.vstack([A, [0, 0, 0, -I1pts[i][j], -I1pts[i][j + 1], -1, I1pts[i][j] * I2pts[i][j + 1],
-                               I1pts[i][j + 1] * I2pts[i][j + 1], I2pts[i][j + 1]]])
+    for i in range(0, len(I1pts[0])):
+        if i == 0:
+            A = np.array([-I1pts[0][i], -I1pts[1][i], -1, 0, 0, 0,
+                          I1pts[0][i] * I2pts[0][i], I1pts[1][i] * I2pts[0][i], I2pts[0][i]])
+            A = np.vstack([A, [0, 0, 0, -I1pts[0][i], -I1pts[1][i], -1,
+                               I1pts[0][i] * I2pts[1][i], I1pts[1][i] * I2pts[1][i], I2pts[1][i]]])
+            continue
+        A = np.vstack([A, [-I1pts[0][i], -I1pts[1][i], -1, 0, 0, 0,
+                           I1pts[0][i] * I2pts[0][i], I1pts[1][i] * I2pts[0][i], I2pts[0][i]]])
+        A = np.vstack([A, [0, 0, 0, -I1pts[0][i], -I1pts[1][i], -1,
+                           I1pts[0][i] * I2pts[1][i], I1pts[1][i] * I2pts[1][i], I2pts[1][i]]])
+
     # The H matrix is made up of the h_vector that is the null-space of the A matrix:
-    h_vector = np.array(Matrix(A).nullspace())
+    h_vector = null_space(A)
+    # Normalizing such that the lower right entry in the matrix is 1:
+    h_vector = h_vector/h_vector[len(h_vector) - 1]
     H = h_vector.reshape(3, 3)
     # ------------------
-
-
 
     return H, A

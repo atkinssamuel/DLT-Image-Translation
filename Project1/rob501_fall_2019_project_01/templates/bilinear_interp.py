@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.linalg import inv
 
+
 def bilinear_interp(I, pt):
     """
     Performs bilinear interpolation for a given image point.
@@ -23,11 +24,26 @@ def bilinear_interp(I, pt):
     --------
     b  - Interpolated brightness or intensity value (whole number >= 0).
     """
-    #--- FILL ME IN ---
-
+    # --- FILL ME IN ---
     if pt.shape != (2, 1):
         raise ValueError('Point size is incorrect.')
+    x = int(pt[0].round())
+    y = int(pt[1].round())
 
-    #------------------
+    x1 = x - 1
+    y1 = y + 1
+    x2 = x + 1
+    y2 = y - 1
+
+    q_11 = I[y1][x1]
+    q_21 = I[y2][x1]
+    q_12 = I[y1][x2]
+    q_22 = I[y2][x2]
+
+    b = round(((x2 - x) * (y2 - y) * q_11 + (x - x1) * (y2 - y) * q_21 \
+         + (x2 - x) * (y - y1) * q_12 + (x - x1) * (y - y1) * q_22) \
+        / ((x2 - x1) * (y2 - y1)))
+
+    # ------------------
 
     return b

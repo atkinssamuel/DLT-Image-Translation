@@ -9,3 +9,4 @@ plt.imshow(I, cmap = "gray", vmin = 0, vmax = 255)
 plt.show()
 plt.imshow(J, cmap = "gray", vmin = 0, vmax = 255)
 plt.show()
+

@@ -14,11 +14,12 @@ if __name__ == "__main__":
     I2pts = np.array([[375, 420, 420, 450], \
                       [ 20,  20, 300, 290]])
     (H, A) = dlt_homography(I1pts, I2pts)
-    print(H)
 
-    test_point_translation([1, 1], H)
-    test_point_translation([5, 220], H)
-    test_point_translation([220, 5], H)
+    print(H.astype(float))
+
+    test_point_translation([5, 1], H)
+    test_point_translation([220, 1], H)
+    test_point_translation([220, 411], H)
+    test_point_translation([5, 411], H)
 
 
-# Don't forget: the homography operates on homogeneous points!
