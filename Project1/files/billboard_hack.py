@@ -8,6 +8,7 @@ from imageio import imread, imwrite
 from dlt_homography import dlt_homography
 from bilinear_interp import bilinear_interp
 from histogram_eq import histogram_eq
+from PIL import Image
 
 def billboard_hack():
     """
@@ -31,6 +32,9 @@ def billboard_hack():
 
     Ihack = np.asarray(Iyd)
     Ist = np.asarray(Ist)
+
+    im = Image.fromarray(Iyd)
+    im.save("original_image.jpeg")
 
     # -----------------------------------------------------------------------------------------------------------------#
     # --- FILL ME IN ---
@@ -64,6 +68,8 @@ def billboard_hack():
                 [x, y, normal] = [x, y, normal] / normal
                 if (x < 219 and y < 410):
                     Ihack[v][u] = bilinear_interp(Ist_balanced, np.array([[x, y]]).T)
+    im = Image.fromarray(Ihack)
+    im.save("final_image.jpeg")
 
     Ihack = Ihack.astype(np.uint8)
     #------------------
