@@ -7,7 +7,7 @@ def bilinear_interp(I, pt):
     Performs bilinear interpolation for a given image point.
 
     Given the (x, y) location of a point in an input image, use the surrounding
-    4 pixels to conmpute the bilinearly-interpolated output pixel intensity.
+    4 pixels to compute the bilinearly-interpolated output pixel intensity.
 
     Note that images are (usually) integer-valued functions (in 2D), therefore
     the intensity value you return must be an integer (use round()).
@@ -27,23 +27,23 @@ def bilinear_interp(I, pt):
     # --- FILL ME IN ---
     if pt.shape != (2, 1):
         raise ValueError('Point size is incorrect.')
-    x = int(pt[0].round())
-    y = int(pt[1].round())
+    x = pt[0]
+    y = pt[1]
 
-    x1 = x - 1
-    y1 = y + 1
-    x2 = x + 1
-    y2 = y - 1
+    x1 = int(x)
+    y1 = int(y)
+    x2 = x1 + 1
+    y2 = y1 + 1
 
     q_11 = I[y1][x1]
-    q_21 = I[y2][x1]
-    q_12 = I[y1][x2]
+    q_21 = I[y1][x2]
+    q_12 = I[y2][x1]
     q_22 = I[y2][x2]
 
-    b = round(((x2 - x) * (y2 - y) * q_11 + (x - x1) * (y2 - y) * q_21 \
+    b = (((x2 - x) * (y2 - y) * q_11 + (x - x1) * (y2 - y) * q_21 \
          + (x2 - x) * (y - y1) * q_12 + (x - x1) * (y - y1) * q_22) \
         / ((x2 - x1) * (y2 - y1)))
-
+    b = int(np.round(b))
     # ------------------
 
     return b

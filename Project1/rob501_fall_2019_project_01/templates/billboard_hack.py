@@ -9,12 +9,6 @@ from dlt_homography import dlt_homography
 from bilinear_interp import bilinear_interp
 from histogram_eq import histogram_eq
 
-def show_rectangle(I, coord):
-    plt.imshow(I)
-    xs, ys = zip(*coord)
-    plt.plot(xs, ys)
-    plt.show()
-
 def billboard_hack():
     """
     Hack and replace the billboard!
@@ -26,12 +20,11 @@ def billboard_hack():
     --------
     Ihack  - Hacked RGB intensity image, 8-bit np.array (i.e., uint8).
     """
-    # Bounding box in Y & D Square image.
-    bbox = np.array([[404, 490, 404, 490], [38,  38, 354, 354]])
+    bbox = np.array([[404, 490, 404, 490], [38, 38, 354, 354]])
 
     # Point correspondences.
-    Iyd_pts = np.array([[416, 485, 488, 410], [40,  61, 353, 349]])
-    Ist_pts = np.array([[2, 219, 219, 2], [2, 2, 410, 410]])
+    Iyd_pts = np.array([[416, 485, 488, 410], [40, 61, 353, 349]])
+    Ist_pts = np.array([[2, 218, 218, 2], [2, 2, 409, 409]])
 
     Iyd = imread('../billboard/yonge_dundas_square.jpg')
     Ist = imread('../billboard/uoft_soldiers_tower_dark.png')
@@ -39,44 +32,40 @@ def billboard_hack():
     Ihack = np.asarray(Iyd)
     Ist = np.asarray(Ist)
 
-    #--- FILL ME IN ---
-    Iyd = np.asarray(Iyd)
-    Ist_poly = [[70, 80], [115, 70], [153, 80], [152, 355], [63, 355], [70, 80]]
-    Iyd_poly = [[404, 38], [490, 38], [490, 354], [404, 354], [404, 38]]
-
-    # show_rectangle(Ist, Ist_poly)
-
+    # -----------------------------------------------------------------------------------------------------------------#
+    # --- FILL ME IN ---
     # Let's do the histogram equalization first.
-    Ist = histogram_eq(Ist)
+    Ist_balanced = histogram_eq(Ist)
 
     # Compute the perspective homography we need...
-    H, A = dlt_homography(Ist_pts, Iyd_pts)
+    H, A = dlt_homography(Iyd_pts, Ist_pts)
 
-    # Main 'for' loop to do the warp and insertion - 
+    # Main 'for' loop to do the warp and insertion -
     # this could be vectorized to be faster if needed!
-    path = matplotlib.path.Path(Ist_poly)
-    for i in range(len(Ist)): # i -> 411
-        for j in range(len(Ist[0])): # j -> 220
-            if path.contains_point([i, j]):
-                [u, v, normal] = np.dot(H, np.array([i, j, 1]))
-                [u, v, normal] = [u, v, normal]/normal
-                u = int(u.round())
-                v = int(v.round())
-                Ihack[v][u] = Ist[j][i]
+    UL = [bbox[0][0], bbox[1][0]]  # Upper Left
+    UR = [bbox[0][1], bbox[1][1]]  # Upper Right
+    # Updated bounding box definition:
+    UR = [488, 59]
+    BL = [bbox[0][2], bbox[1][2]]  # Bottom Left
+    BR = [bbox[0][3], bbox[1][3]]  # Bottom Right
+    Iyd_poly = [UL, UR, BR, BL, UL]
+    codes = [
+        Path.MOVETO,
+        Path.LINETO,
+        Path.LINETO,
+        Path.LINETO,
+        Path.CLOSEPOLY
+    ]
+    billboard_path = Path(Iyd_poly, codes)
+    for v in range(len(Iyd)):
+        for u in range(len(Iyd[0])):
+            if billboard_path.contains_point([u, v]):
+                [x, y, normal] = np.dot(H, np.array([u, v, 1]))
+                [x, y, normal] = [x, y, normal] / normal
+                if (x < 219 and y < 410):
+                    Ihack[v][u] = bilinear_interp(Ist_balanced, np.array([[x, y]]).T)
 
-    Iyd_shape = (601, 900, 3) # = Ihack_shape - 600 down, 900 across, 3 color channels
-    Ist_shape = (411, 220) # 411 down, 220 across, 1 color channel
-
-
-    # You may wish to make use of the contains_points() method
-    # available in the matplotlib.path.Path class!
-
+    Ihack = Ihack.astype(np.uint8)
     #------------------
-
-    plt.imshow(Ihack)
-    plt.show()
-    plt.imshow(Iyd)
-    plt.show()
-    # imwrite(Ihack, 'billboard_hacked.png');
 
     return Ihack

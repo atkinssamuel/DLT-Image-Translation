@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def histogram_eq(I):
     """
@@ -22,13 +22,20 @@ def histogram_eq(I):
     # Verify I is grayscale.
     if I.dtype != np.uint8:
         raise ValueError('Incorrect image format!')
-    flattened_image = I.flatten()
-    histogram, bins = np.histogram(flattened_image, 256, [0, 256])
+
+    # histogram formation
+    histogram, bins = np.histogram(I.flatten(), 256, [0, 256])
+
+    # creating an array of the cdf
     cdf = histogram.cumsum()
-    cdf_m = np.ma.masked_equal(cdf, 0)
-    cdf_m = (cdf_m - cdf_m.min()) * 255 / (cdf_m.max() - cdf_m.min())
-    cdf = np.ma.filled(cdf_m, 0).astype('uint8')
-    J = cdf[I]
+
+    # normalizing
+    cdf_normalized = cdf * histogram.max() / cdf.max()
+
+    # histogram equalization:
+    cdf_masked = np.ma.masked_equal(cdf_normalized, 0)
+    cdf_masked = (cdf_masked - cdf_masked.min()) * 255 / (cdf_masked.max() - cdf_masked.min())
+    J = cdf_masked[I]
     # ------------------
 
     return J
